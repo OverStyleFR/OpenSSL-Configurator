@@ -19,3 +19,14 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Le reste du script ici
+
+# Appel du script secondaire
+if ./assets/check_main_directory.sh; then
+    echo "Le script secondaire a réussi."
+else
+    echo "Le script secondaire a échoué."
+    exit 1
+fi
+
+# Si tout va bien
+echo "Le script principal continue..."
