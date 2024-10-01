@@ -20,6 +20,7 @@ fi
 
 # Le reste du script ici
 
+
 # Variables dynamiques pour le domaine et les fichiers/dossiers spécifiques
 DOMAIN="int.ovst.fr"
 SERVICE_NAME="gitlab" # Nom du service qui change selon le script principal
@@ -44,9 +45,17 @@ create_file_or_dir() {
         # Vérifie s'il s'agit d'un fichier ou d'un dossier (basé sur la présence d'une extension)
         if [[ "$1" == *.* ]]; then
             touch "$1"  # Créer un fichier
+            if [ $? -ne 0 ]; then
+                echo "Erreur: Échec de la création du fichier $1"
+                exit 1
+            fi
             echo "Fichier $1 créé avec succès."
         else
             mkdir -p "$1"  # Créer un dossier
+            if [ $? -ne 0 ]; then
+                echo "Erreur: Échec de la création du dossier $1"
+                exit 1
+            fi
             echo "Dossier $1 créé avec succès."
         fi
     else
@@ -62,3 +71,7 @@ for item in "${files_and_dirs[@]}"; do
         echo "$item existe déjà."
     fi
 done
+
+# Si toutes les opérations se sont bien passées, retourner "true"
+echo "true"
+exit 0

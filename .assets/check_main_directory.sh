@@ -8,22 +8,21 @@ VIOLET=$(tput setaf 5)
 YELLOW=$(tput setaf 3)
 BOLD=$(tput bold)
 RESET=$(tput sgr0)
+
 ########################################## INITIALISATION ROOT ##########################################
 
 # Vérifier si l'utilisateur est root
 if [[ $EUID -ne 0 ]]; then
-   echo "${RED}${BOLD}Ce script doit être exécuté en tant que root${RESET}" 
-   # Demander le mot de passe
-   sudo "$0" "$@"
-   exit 1
+    echo "${RED}${BOLD}Ce script doit être exécuté en tant que root${RESET}"
+    # Demander le mot de passe et relancer le script avec sudo
+    sudo "$0" "$@"
+    exit 1
 fi
-
-# Le reste du script ici
 
 # Définition de la variable pour le domaine
 DOMAIN="int.ovst.fr"
 
-# Définir le chemin de base à partir de l'endroit où le script est exécuté
+# Définir le chemin de base à partir du répertoire où le script est exécuté
 BASE_DIR=$(pwd)
 
 # Définition des dossiers à vérifier (à partir du répertoire courant)
@@ -40,9 +39,13 @@ create_directory() {
     read -p "Le dossier $1 n'existe pas. Voulez-vous le créer ? (y/n): " choice
     if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
         mkdir -p "$1"
-        echo "Dossier $1 créé avec succès."
+        if [ $? -ne 0 ]; then
+            echo "${RED}Erreur: Échec de la création du dossier $1${RESET}"
+            exit 1
+        fi
+        echo "${GREEN}Dossier $1 créé avec succès.${RESET}"
     else
-        echo "Le dossier $1 n'a pas été créé."
+        echo "${YELLOW}Le dossier $1 n'a pas été créé.${RESET}"
     fi
 }
 
@@ -51,6 +54,13 @@ for dir in "${directories[@]}"; do
     if [ ! -d "$dir" ]; then
         create_directory "$dir"
     else
-        echo "Le dossier $dir existe déjà."
+        echo "${BLUE}Le dossier $dir existe déjà.${RESET}"
     fi
 done
+
+########################################## RETOUR DE STATUT ##########################################
+
+# Si toutes les opérations se sont bien passées, retourner "true"
+echo "${GREEN}Tous les dossiers sont présents ou ont été créés avec succès.${RESET}"
+echo "true"
+exit 0
