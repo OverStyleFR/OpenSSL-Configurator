@@ -20,7 +20,9 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Définition de la variable pour le domaine
-DOMAIN="int.ovst.fr"
+DOMAIN="$1"
+SERVICE_NAME="$2"
+FQDN="$SERVICE_NAME.$DOMAIN"
 
 # Définir le chemin de base à partir du répertoire où le script est exécuté
 BASE_DIR=$(pwd)

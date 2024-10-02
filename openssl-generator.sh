@@ -18,12 +18,27 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-# Le reste du script ici
+# Définir le chemin de base à partir du répertoire où le script est exécuté
+BASE_DIR=$(pwd)
 
-# Appel du script secondaire
-if ./.assets/check_main_directory.sh; then
-    echo "Le script secondaire s'est terminé avec succès."
+# Demander à l'utilisateur le domaine et le service
+echo -n "Entrez le domaine pour lequel générer les certificats : "
+read DOMAIN
+
+echo -n "Entrez le nom du service (ex: gitlab) : "
+read SERVICE_NAME
+
+# Appel du script secondaire en passant les variables DOMAIN et SERVICE_NAME
+if $BASE_DIR/.assets/check_main_directory.sh "$DOMAIN" "$SERVICE_NAME"; then
+    echo "Le script check_main_directory.sh s'est terminé avec succès."
 else
-    echo "Le script secondaire a échoué."
+    echo "Le script check_main_directory.sh a échoué."
+    exit 1
+fi
+
+if $BASE_DIR/.assets/check_domain_directory.sh "$DOMAIN" "$SERVICE_NAME"; then
+    echo "Le script check_domain_directory.sh s'est terminé avec succès."
+else
+    echo "Le script check_domain_directory.sh a échoué."
     exit 1
 fi

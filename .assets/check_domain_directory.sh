@@ -19,10 +19,10 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-# Variables dynamiques pour le domaine et les fichiers/dossiers spécifiques
-DOMAIN="int.ovst.fr"
-SERVICE_NAME="gitlab" # Nom du service qui change selon le script principal
-FQDN="$SERVICE_NAME.$DOMAIN" # Utilisé pour le nom des certificats
+# Récupérer les paramètres passés par le script principal
+DOMAIN="$1"
+SERVICE_NAME="$2"
+FQDN="$SERVICE_NAME.$DOMAIN"
 
 # Définir le chemin de base à partir de l'endroit où le script est exécuté
 BASE_DIR=$(pwd)
@@ -30,38 +30,77 @@ BASE_DIR=$(pwd)
 # Liste des fichiers et dossiers à vérifier (en fonction des variables)
 files_and_dirs=(
     "/root/Docker/applications/nginx/configuration/sites/$DOMAIN/$SERVICE_NAME.conf"
-    "/root/Docker/applications/nginx/logs/$DOMAIN/$SERVICE_NAME"
+)
+
+# Ajouter le dossier des logs du service
+LOG_DIR="/root/Docker/applications/nginx/logs/$DOMAIN/$SERVICE_NAME"
+
+# Vérification du dossier de logs
+if [ -d "$LOG_DIR" ]; then
+    echo "${VIOLET}Le dossier $LOG_DIR existe.${RESET}"
+else
+    read -p "${YELLOW}Le dossier $LOG_DIR n'existe pas. Voulez-vous le créer ? (y/n): ${RESET}" choice
+    if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
+        mkdir -p "$LOG_DIR"
+        if [ $? -ne 0 ]; then
+            echo "${RED}Erreur: Échec de la création du dossier $LOG_DIR${RESET}"
+            exit 1
+        fi
+        echo "${GREEN}Dossier $LOG_DIR créé avec succès.${RESET}"
+    else
+        echo "${BLUE}Le dossier $LOG_DIR n'a pas été créé.${RESET}"
+        exit 1
+    fi
+fi
+
+# Vérification des fichiers access.log et error.log dans le dossier de logs
+log_files=("access.log" "error.log")
+
+for log_file in "${log_files[@]}"; do
+    log_path="$LOG_DIR/$log_file"
+    if [ -f "$log_path" ]; then
+        echo "${VIOLET}Le fichier $log_path existe déjà.${RESET}"
+    else
+        read -p "${YELLOW}Le fichier $log_file n'existe pas. Voulez-vous le créer ? (y/n): ${RESET}" choice
+        if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
+            touch "$log_path"
+            if [ $? -ne 0 ]; then
+                echo "${RED}Erreur: Échec de la création du fichier $log_file${RESET}"
+                exit 1
+            fi
+            echo "${GREEN}Fichier $log_file créé avec succès dans $LOG_DIR.${RESET}"
+        else
+            echo "${BLUE}Le fichier $log_file n'a pas été créé.${RESET}"
+        fi
+    fi
+done
+
+# Vérification des dossiers Docker/pki/certs, Docker/pki/csr, Docker/pki/private
+pki_dirs=(
     "/root/Docker/pki/certs/$FQDN"
     "/root/Docker/pki/csr/$FQDN"
     "/root/Docker/pki/private/$FQDN"
 )
 
-# Fonction pour demander à l'utilisateur s'il veut créer un fichier ou dossier
-create_file_or_dir() {
-    read -p "${YELLOW}Le fichier ou dossier $1 n'existe pas. Voulez-vous le créer ? (y/n): ${RESET}" choice
-    if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
-        # Vérifie s'il s'agit d'un fichier ou d'un dossier (basé sur la présence d'une extension)
-        if [[ "$1" == *.* ]]; then
-            touch "$1"  # Créer un fichier
-            if [ $? -ne 0 ]; then
-                echo "${RED}Erreur: Échec de la création du fichier $1${RESET}"
-                exit 1
-            fi
-            echo "${GREEN}Fichier $1 créé avec succès.${RESET}"
-        else
-            mkdir -p "$1"  # Créer un dossier
-            if [ $? -ne 0 ]; then
-                echo "${RED}Erreur: Échec de la création du dossier $1${RESET}"
-                exit 1
-            fi
-            echo "${GREEN}Dossier $1 créé avec succès.${RESET}"
-        fi
+for pki_dir in "${pki_dirs[@]}"; do
+    if [ -d "$pki_dir" ]; then
+        echo "${VIOLET}Le dossier $pki_dir existe.${RESET}"
     else
-        echo "${BLUE}Le fichier ou dossier $1 n'a pas été créé.${RESET}"
+        read -p "${YELLOW}Le dossier $pki_dir n'existe pas. Voulez-vous le créer ? (y/n): ${RESET}" choice
+        if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
+            mkdir -p "$pki_dir"
+            if [ $? -ne 0 ]; then
+                echo "${RED}Erreur: Échec de la création du dossier $pki_dir${RESET}"
+                exit 1
+            fi
+            echo "${GREEN}Dossier $pki_dir créé avec succès.${RESET}"
+        else
+            echo "${BLUE}Le dossier $pki_dir n'a pas été créé.${RESET}"
+        fi
     fi
-}
+done
 
-# Vérification de chaque fichier ou dossier
+# Vérification des autres fichiers et dossiers
 for item in "${files_and_dirs[@]}"; do
     if [ ! -e "$item" ]; then
         create_file_or_dir "$item"
