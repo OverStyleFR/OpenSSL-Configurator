@@ -60,6 +60,19 @@ if [ $? -ne 0 ]; then
 fi
 echo "${GREEN}Demande de certificat générée avec succès à $CSR_PATH.${RESET}"
 
+# Demander à l'utilisateur s'il veut changer le propriétaire de la clé privée
+read -p "${YELLOW}Voulez-vous appliquer 'chown 1000:1000' à la clé privée ? (y/n): ${RESET}" key_chown_choice
+if [[ "$key_chown_choice" == "y" || "$key_chown_choice" == "Y" ]]; then
+    chown 1000:1000 "$PRIVATE_KEY_PATH"
+    if [ $? -ne 0 ]; then
+        echo "${RED}Erreur: Échec de l'application de 'chown' sur $PRIVATE_KEY_PATH${RESET}"
+        exit 1
+    fi
+    echo "${GREEN}Permissions 'chown 1000:1000' appliquées sur $PRIVATE_KEY_PATH avec succès.${RESET}"
+else
+    echo "${BLUE}Les permissions de la clé privée n'ont pas été modifiées.${RESET}"
+fi
+
 ########################################## RETOUR DE STATUT ##########################################
 
 echo "${GREEN}Clé et demande de certificat créées avec succès.${RESET}"
