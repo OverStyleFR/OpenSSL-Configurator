@@ -2,26 +2,26 @@
 
 ## Description
 
-**OpenSSL-Configurator** est un projet d'automatisation conçu pour simplifier la génération de certificats locaux en PKI. Ce script prend en charge tout le processus, de la création des dossiers nécessaires à la génération des clés privées, en passant par l'envoi des demandes de signature (CSR) à une autorité de certification pour générer des certificats. Il automatise chaque étape afin de rendre l'intégration rapide et facile.
+**OpenSSL-Configurator** is an automation project designed to simplify the generation of local certificates using PKI. This script handles the entire process, from creating the necessary folders and generating private keys to sending certificate signing requests (CSR) to a certification authority for certificate generation. It automates each step to ensure quick and easy integration.
 
-### Fonctionnalités :
+### Features:
 
-- Création automatique des dossiers si nécessaire.
-- Génération de clés privées.
-- Création des fichiers de demande de certificat (request files).
-- Connexion automatique à une autorité de certification pour exécuter la commande permettant de générer le certificat à partir du fichier de demande.
+- Automatic creation of folders if needed.
+- Generation of private keys.
+- Creation of certificate request files (CSR).
+- Automatic connection to a certification authority to generate the certificate from the request file.
 
-## Prérequis
+## Prerequisites
 
-Avant de pouvoir utiliser **OpenSSL-Configurator**, assurez-vous d'avoir les éléments suivants installés sur votre système :
+Before using **OpenSSL-Configurator**, ensure you have the following installed on your system:
 
-- **Terminal Bash** (pour exécuter le script).
-- **OpenSSL** (outil utilisé pour générer les certificats).
-- Accès à une autorité de certification (CA) pour signer les demandes de certificats.
+- **Bash terminal** (to run the script).
+- **OpenSSL** (tool used for certificate generation).
+- Access to a certification authority (CA) to sign certificate requests.
 
 ## Usage
 
-Pour exécuter le script, il suffit de lancer la commande suivante dans un terminal Bash :
+To run the script, simply execute the following command in a Bash terminal:
 
 ***
 ```bash
@@ -29,14 +29,14 @@ bash <(curl -s https://gitlab.ovst.fr/tomv/openssl-configurator/-/raw/main/opens
 ```
 ***
 
-## Scripts disponibles
+## Available Scripts
 
 | Script                                          | Description                                                                                                   |
 |-------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
-| [openssl-configurator.sh](https://gitlab.ovst.fr/tomv/openssl-configurator/-/raw/main/openssl-configurator.sh)  | Le script principal pour automatiser la génération de certificats locaux avec OpenSSL.                          |
+| [openssl-configurator.sh](https://gitlab.ovst.fr/tomv/openssl-configurator/-/raw/main/openssl-configurator.sh)  | The main script to automate the generation of local certificates with OpenSSL.                                 |
 
-## Licence
+## License
 
-Le projet est distribué sous la licence CC BY-NC-SA 4.0. Voir le fichier [LICENSE](./LICENSE) pour plus de détails.
+The project is distributed under the CC BY-NC-SA 4.0 license. See the [LICENSE](./LICENSE) file for more details.
 
 Made with ❤️ by [Tom V.](https://tomv.ovh)
