@@ -31,10 +31,13 @@ BASE_DIR=$(pwd)
 directories=(
     "$BASE_DIR/Docker/applications/nginx/configuration/sites/$DOMAIN"
     "$BASE_DIR/Docker/applications/nginx/logs/$DOMAIN"
-    "$BASE_DIR/Docker/pki/certs"
-    "$BASE_DIR/Docker/pki/csr"
-    "$BASE_DIR/Docker/pki/private"
+    "$BASE_DIR/Docker/pki/certs/$FQDN"
+    "$BASE_DIR/Docker/pki/csr/$FQDN"
+    "$BASE_DIR/Docker/pki/private/$FQDN"
 )
+
+# Liste des dossiers créés
+created_dirs=()
 
 # Fonction pour demander à l'utilisateur s'il veut créer un dossier
 create_directory() {
@@ -46,6 +49,7 @@ create_directory() {
             exit 1
         fi
         echo "${GREEN}Dossier $1 créé avec succès.${RESET}"
+        created_dirs+=("$1")  # Ajouter le dossier à la liste des dossiers créés
     else
         echo "${YELLOW}Le dossier $1 n'a pas été créé.${RESET}"
     fi
@@ -59,6 +63,23 @@ for dir in "${directories[@]}"; do
         echo "${BLUE}Le dossier $dir existe déjà.${RESET}"
     fi
 done
+
+# Demander à l'utilisateur s'il veut appliquer "chown -R 1000:1000" sur les dossiers créés
+if [ ${#created_dirs[@]} -gt 0 ]; then
+    read -p "${YELLOW}Voulez-vous appliquer 'chown -R 1000:1000' aux dossiers créés ? (y/n): ${RESET}" chown_choice
+    if [[ "$chown_choice" == "y" || "$chown_choice" == "Y" ]]; then
+        for dir in "${created_dirs[@]}"; do
+            chown -R 1000:1000 "$dir"
+            if [ $? -ne 0 ]; then
+                echo "${RED}Erreur: Échec de l'application de 'chown' sur $dir${RESET}"
+                exit 1
+            fi
+            echo "${GREEN}Permissions 'chown -R 1000:1000' appliquées sur $dir avec succès.${RESET}"
+        done
+    else
+        echo "${BLUE}Les permissions n'ont pas été modifiées.${RESET}"
+    fi
+fi
 
 ########################################## RETOUR DE STATUT ##########################################
 

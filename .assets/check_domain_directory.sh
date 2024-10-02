@@ -32,46 +32,43 @@ files_and_dirs=(
     "/root/Docker/applications/nginx/configuration/sites/$DOMAIN/$SERVICE_NAME.conf"
 )
 
-# Ajouter le dossier des logs du service
+# Dossier des logs du service
 LOG_DIR="/root/Docker/applications/nginx/logs/$DOMAIN/$SERVICE_NAME"
 
-# Vérification du dossier de logs
-if [ -d "$LOG_DIR" ]; then
-    echo "${VIOLET}Le dossier $LOG_DIR existe.${RESET}"
-else
-    read -p "${YELLOW}Le dossier $LOG_DIR n'existe pas. Voulez-vous le créer ? (y/n): ${RESET}" choice
-    if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
-        mkdir -p "$LOG_DIR"
+# Vérification et création du dossier de logs
+create_directory() {
+    local dir="$1"
+    if [ ! -d "$dir" ]; then
+        echo "${YELLOW}Le dossier $dir n'existe pas. Création...${RESET}"
+        mkdir -p "$dir"
         if [ $? -ne 0 ]; then
-            echo "${RED}Erreur: Échec de la création du dossier $LOG_DIR${RESET}"
+            echo "${RED}Erreur: Échec de la création du dossier $dir${RESET}"
             exit 1
         fi
-        echo "${GREEN}Dossier $LOG_DIR créé avec succès.${RESET}"
+        echo "${GREEN}Dossier $dir créé avec succès.${RESET}"
     else
-        echo "${BLUE}Le dossier $LOG_DIR n'a pas été créé.${RESET}"
-        exit 1
+        echo "${VIOLET}Le dossier $dir existe déjà.${RESET}"
     fi
-fi
+}
+
+# Vérification du dossier de logs
+create_directory "$LOG_DIR"
 
 # Vérification des fichiers access.log et error.log dans le dossier de logs
 log_files=("access.log" "error.log")
 
 for log_file in "${log_files[@]}"; do
     log_path="$LOG_DIR/$log_file"
-    if [ -f "$log_path" ]; then
-        echo "${VIOLET}Le fichier $log_path existe déjà.${RESET}"
-    else
-        read -p "${YELLOW}Le fichier $log_file n'existe pas. Voulez-vous le créer ? (y/n): ${RESET}" choice
-        if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
-            touch "$log_path"
-            if [ $? -ne 0 ]; then
-                echo "${RED}Erreur: Échec de la création du fichier $log_file${RESET}"
-                exit 1
-            fi
-            echo "${GREEN}Fichier $log_file créé avec succès dans $LOG_DIR.${RESET}"
-        else
-            echo "${BLUE}Le fichier $log_file n'a pas été créé.${RESET}"
+    if [ ! -f "$log_path" ]; then
+        echo "${YELLOW}Le fichier $log_file n'existe pas. Création...${RESET}"
+        touch "$log_path"
+        if [ $? -ne 0 ]; then
+            echo "${RED}Erreur: Échec de la création du fichier $log_file${RESET}"
+            exit 1
         fi
+        echo "${GREEN}Fichier $log_file créé avec succès dans $LOG_DIR.${RESET}"
+    else
+        echo "${VIOLET}Le fichier $log_path existe déjà.${RESET}"
     fi
 done
 
@@ -82,28 +79,36 @@ pki_dirs=(
     "/root/Docker/pki/private/$FQDN"
 )
 
+# Vérification et création des dossiers PKI
 for pki_dir in "${pki_dirs[@]}"; do
-    if [ -d "$pki_dir" ]; then
-        echo "${VIOLET}Le dossier $pki_dir existe.${RESET}"
-    else
-        read -p "${YELLOW}Le dossier $pki_dir n'existe pas. Voulez-vous le créer ? (y/n): ${RESET}" choice
-        if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
-            mkdir -p "$pki_dir"
-            if [ $? -ne 0 ]; then
-                echo "${RED}Erreur: Échec de la création du dossier $pki_dir${RESET}"
-                exit 1
-            fi
-            echo "${GREEN}Dossier $pki_dir créé avec succès.${RESET}"
-        else
-            echo "${BLUE}Le dossier $pki_dir n'a pas été créé.${RESET}"
-        fi
-    fi
+    create_directory "$pki_dir"
 done
 
-# Vérification des autres fichiers et dossiers
+# Demander à l'utilisateur s'il veut changer les permissions sur les dossiers créés
+read -p "${YELLOW}Voulez-vous appliquer 'chown -R 1000:1000' aux dossiers créés ? (y/n): ${RESET}" chown_choice
+if [[ "$chown_choice" == "y" || "$chown_choice" == "Y" ]]; then
+    for dir in "${pki_dirs[@]}"; do
+        chown -R 1000:1000 "$dir"
+        if [ $? -ne 0 ]; then
+            echo "${RED}Erreur: Échec de l'application de 'chown' sur $dir${RESET}"
+            exit 1
+        fi
+        echo "${GREEN}Permissions 'chown -R 1000:1000' appliquées sur $dir avec succès.${RESET}"
+    done
+else
+    echo "${BLUE}Les permissions n'ont pas été modifiées.${RESET}"
+fi
+
+# Vérification du fichier .conf
 for item in "${files_and_dirs[@]}"; do
     if [ ! -e "$item" ]; then
-        create_file_or_dir "$item"
+        echo "${YELLOW}Le fichier $item n'existe pas. Création...${RESET}"
+        touch "$item"
+        if [ $? -ne 0 ]; then
+            echo "${RED}Erreur: Échec de la création du fichier $item${RESET}"
+            exit 1
+        fi
+        echo "${GREEN}Fichier $item créé avec succès.${RESET}"
     else
         echo "${VIOLET}$item existe déjà.${RESET}"
     fi
