@@ -42,3 +42,10 @@ else
     echo "Le script check_domain_directory.sh a échoué."
     exit 1
 fi
+
+if $BASE_DIR/.assets/openssl_generate_request.sh "$DOMAIN" "$SERVICE_NAME"; then
+    echo "Le script check_domain_directory.sh s'est terminé avec succès."
+else
+    echo "Le script check_domain_directory.sh a échoué."
+    exit 1
+fi
