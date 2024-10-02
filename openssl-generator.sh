@@ -50,6 +50,13 @@ else
     exit 1
 fi
 
+if $BASE_DIR/.assets/create_config.sh "$DOMAIN" "$SERVICE_NAME"; then
+    echo "Le script check_domain_directory.sh s'est terminé avec succès."
+else
+    echo "Le script create_config.sh a échoué."
+    exit 1
+fi
+
 if $BASE_DIR/.assets/openssl_request_certificate.sh "$DOMAIN" "$SERVICE_NAME"; then
     echo "Le script check_domain_directory.sh s'est terminé avec succès."
 else
