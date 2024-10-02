@@ -53,6 +53,13 @@ fi
 if $BASE_DIR/.assets/openssl_request_certificate.sh "$DOMAIN" "$SERVICE_NAME"; then
     echo "Le script check_domain_directory.sh s'est terminé avec succès."
 else
-    echo "Le script check_domain_directory.sh a échoué."
+    echo "Le script openssl_request_certificate.sh a échoué."
+    exit 1
+fi
+
+if $BASE_DIR/.assets/sign_certificate.sh "$DOMAIN" "$SERVICE_NAME"; then
+    echo "Le script check_domain_directory.sh s'est terminé avec succès."
+else
+    echo "Le script sign_certificate.sh a échoué."
     exit 1
 fi
