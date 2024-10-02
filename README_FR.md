@@ -1,4 +1,22 @@
+<div align="center">
+
 # OpenSSL-Configurator
+
+<p align="center">
+  <a href="./README.md">English</a> |
+  <a href="./README_FR.md">Français</a>
+</p>
+
+<p align="center">
+  <a href="https://gitlab.ovst.fr/tomv/openssl-configurator">
+    <img height="21" src="https://img.shields.io/badge/Repository-Visit-green?style=flat-square&logo=gitlab" alt="GitLab Repository">
+  </a>
+  <a href="https://gitlab.ovst.fr/tomv/openssl-configurator/-/blob/main/LICENSE">
+    <img height="21" src="https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-yellow?style=flat-square" alt="License">
+  </a>
+</p>
+
+</div>
 
 ## Description
 
