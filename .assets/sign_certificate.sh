@@ -51,5 +51,18 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Demander à l'utilisateur s'il veut changer les permissions sur le certificat récupéré
+read -p "${YELLOW}Voulez-vous appliquer 'chown -R 1000:1000' au certificat récupéré ? (y/n): ${RESET}" chown_choice
+if [[ "$chown_choice" == "y" || "$chown_choice" == "Y" ]]; then
+    chown 1000:1000 "$BASE_DIR/Docker/pki/certs/$FQDN/ssl-$SERVICE_NAME.crt"
+    if [ $? -ne 0 ]; then
+        echo "${RED}Erreur: Échec de l'application de 'chown' sur le certificat.${RESET}"
+        exit 1
+    fi
+    echo "${GREEN}Permissions 'chown -R 1000:1000' appliquées au certificat avec succès.${RESET}"
+else
+    echo "${YELLOW}Les permissions n'ont pas été modifiées.${RESET}"
+fi
+
 echo "${GREEN}Processus terminé avec succès.${RESET}"
 exit 0

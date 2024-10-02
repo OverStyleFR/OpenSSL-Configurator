@@ -6,6 +6,10 @@
 		{
 			"name": "SSH FS - nginx-test",
 			"uri": "ssh://nginx-test/"
+		},
+		{
+			"name": "SSH FS - nginx-proxy",
+			"uri": "ssh://nginx-proxy/"
 		}
 	],
 	"settings": {}

@@ -72,6 +72,21 @@ for log_file in "${log_files[@]}"; do
     fi
 done
 
+# Demander à l'utilisateur s'il veut changer le propriétaire des fichiers de logs
+read -p "${YELLOW}Voulez-vous appliquer 'chown -R 1000:1000' aux fichiers de logs ? (y/n): ${RESET}" log_chown_choice
+if [[ "$log_chown_choice" == "y" || "$log_chown_choice" == "Y" ]]; then
+    for log_file in "${log_files[@]}"; do
+        chown 1000:1000 "$LOG_DIR/$log_file"
+        if [ $? -ne 0 ]; then
+            echo "${RED}Erreur: Échec de l'application de 'chown' sur $LOG_DIR/$log_file${RESET}"
+            exit 1
+        fi
+        echo "${GREEN}Permissions 'chown 1000:1000' appliquées sur $LOG_DIR/$log_file avec succès.${RESET}"
+    done
+else
+    echo "${BLUE}Les permissions des fichiers de logs n'ont pas été modifiées.${RESET}"
+fi
+
 # Vérification des dossiers Docker/pki/certs, Docker/pki/csr, Docker/pki/private
 pki_dirs=(
     "/root/Docker/pki/certs/$FQDN"
